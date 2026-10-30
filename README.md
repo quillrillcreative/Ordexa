@@ -25,7 +25,7 @@ The "Start Your Order" section (`#order`) on the site collects name, phone, prod
 1. Sends the data to a Google Sheet (if configured — see below).
 2. Opens WhatsApp with the same details pre-filled, so you can confirm the order with the customer directly.
 
-A spreadsheet has already been created for you: **[Ordexa Orders](https://docs.google.com/spreadsheets/d/19CAaK0NJ43nukXfR2WgJ96jXttgzWrZPGWBotkKRIzU/edit)**, with headers: Timestamp, Name, Phone, Product / Jumia Link, Notes, Service Fee Quoted (KSh).
+A spreadsheet has already been created for you: **[Ordexa Orders](https://docs.google.com/spreadsheets/d/1bwrZ47KXqU2eTL9a9krqkFG38UOdKMUTAjL8pR7tC_M/edit)**, with headers: Timestamp, Name, Phone, Product / Jumia Link, Notes, Service Fee Quoted (KSh).
 
 To connect the form to it:
 1. Open the spreadsheet link above.

@@ -7,7 +7,7 @@
  *
  * SETUP (one-time, ~5 minutes):
  * 1. Open the "Ordexa Orders" spreadsheet:
- *    https://docs.google.com/spreadsheets/d/19CAaK0NJ43nukXfR2WgJ96jXttgzWrZPGWBotkKRIzU/edit
+ *    https://docs.google.com/spreadsheets/d/1bwrZ47KXqU2eTL9a9krqkFG38UOdKMUTAjL8pR7tC_M/edit
  * 2. Open script.google.com, click New project (works even if the sheet's menu
  *    sends you to AppSheet — this script opens the sheet by its ID).
  * 3. Delete anything in the editor and paste this whole file in.
@@ -36,12 +36,12 @@ function doPost(e) {
   var lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
-    var ss = SpreadsheetApp.openById("19CAaK0NJ43nukXfR2WgJ96jXttgzWrZPGWBotkKRIzU");
+    var ss = SpreadsheetApp.openById("1bwrZ47KXqU2eTL9a9krqkFG38UOdKMUTAjL8pR7tC_M");
     var sheet = ss.getSheetByName("Sheet1") || ss.getSheets()[0];
 
     // Add headers if the sheet is empty
     if (sheet.getLastRow() === 0) {
-      sheet.appendRow(["Timestamp", "Name", "Phone", "Product / Jumia Link", "Notes", "Service Fee Quoted (KSh)"]);
+      sheet.appendRow(["Timestamp", "Name", "Phone", "Product / Jumia Link", "Notes", "Service Fee Quoted (KSh)", "Status", "Date Delivered"]);
     }
 
     // Accept JSON (text/plain body) or normal form fields
@@ -58,8 +58,21 @@ function doPost(e) {
       data.phone || "",
       data.product || "",
       data.notes || "",
-      ""
+      "",     // Service Fee Quoted (KSh) — fill in manually
+      "New",  // Status: New → Quoted → Paid → Ordered → Delivered
+      ""      // Date Delivered
     ]);
+
+    // Email alert to the owner for every new order
+    try {
+      MailApp.sendEmail({
+        to: "kevinmuseny4@gmail.com",
+        subject: "New Ordexa order: " + (data.name || "customer"),
+        body: "Name: " + (data.name || "") + "\nPhone: " + (data.phone || "") +
+              "\nProduct: " + (data.product || "") + "\nNotes: " + (data.notes || "") +
+              "\n\nOpen the sheet: https://docs.google.com/spreadsheets/d/" + "1bwrZ47KXqU2eTL9a9krqkFG38UOdKMUTAjL8pR7tC_M" + "/edit"
+      });
+    } catch (mailErr) {}
 
     return ContentService.createTextOutput(JSON.stringify({ status: "ok" }))
       .setMimeType(ContentService.MimeType.JSON);
