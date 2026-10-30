@@ -27,6 +27,11 @@
  * below to match, and the headers in row 1 of the sheet.
  */
 
+// Lets you open the web app URL in a browser to confirm it's live.
+function doGet() {
+  return ContentService.createTextOutput("Ordexa order webhook is live.");
+}
+
 function doPost(e) {
   try {
     var ss = SpreadsheetApp.openById("19CAaK0NJ43nukXfR2WgJ96jXttgzWrZPGWBotkKRIzU");
