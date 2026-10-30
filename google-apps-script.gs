@@ -33,11 +33,24 @@ function doGet() {
 }
 
 function doPost(e) {
+  var lock = LockService.getScriptLock();
   try {
+    lock.waitLock(10000);
     var ss = SpreadsheetApp.openById("19CAaK0NJ43nukXfR2WgJ96jXttgzWrZPGWBotkKRIzU");
     var sheet = ss.getSheetByName("Sheet1") || ss.getSheets()[0];
 
-    var data = JSON.parse(e.postData.contents);
+    // Add headers if the sheet is empty
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["Timestamp", "Name", "Phone", "Product / Jumia Link", "Notes", "Service Fee Quoted (KSh)"]);
+    }
+
+    // Accept JSON (text/plain body) or normal form fields
+    var data = {};
+    if (e && e.postData && e.postData.contents) {
+      try { data = JSON.parse(e.postData.contents); } catch (x) { data = e.parameter || {}; }
+    } else if (e && e.parameter) {
+      data = e.parameter;
+    }
 
     sheet.appendRow([
       data.timestamp || new Date().toISOString(),
@@ -45,15 +58,27 @@ function doPost(e) {
       data.phone || "",
       data.product || "",
       data.notes || "",
-      "" // Service Fee Quoted (KSh) — fill in manually once you quote the customer
+      ""
     ]);
 
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: "ok" }))
+    return ContentService.createTextOutput(JSON.stringify({ status: "ok" }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: "error", message: err.message }))
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: String(err) }))
       .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    try { lock.releaseLock(); } catch (x) {}
   }
+}
+
+/**
+ * RUN THIS ONCE from the editor (select "testSetup" in the dropdown, click Run).
+ * It forces Google's permission prompt and writes a test row.
+ * If a row appears in the sheet, the backend works.
+ */
+function testSetup() {
+  doPost({ postData: { contents: JSON.stringify({
+    timestamp: new Date().toISOString(), name: "TEST (delete me)",
+    phone: "0700000000", product: "Setup test", notes: "from testSetup()"
+  }) } });
 }
